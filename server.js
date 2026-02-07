@@ -2,8 +2,12 @@ import express from "express";
 
 const app = express();
 
-app.get("/", (req, res) => {
-  res.send("AI OCR APP DZIAŁA 🚀");
+/* 🔥 TO JEST NAJWAŻNIEJSZE */
+app.use(express.static("public"));
+
+/* Test endpoint */
+app.get("/api", (req, res) => {
+  res.json({ status: "API działa 🚀" });
 });
 
 const PORT = process.env.PORT || 3000;

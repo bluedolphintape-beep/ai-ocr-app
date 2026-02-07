@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>AI OCR Email Scanner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body style="font-family: Arial; text-align: center; padding: 40px">
+
+  <h1>📸 Skaner Email AI</h1>
+
+  <input 
+    type="file" 
+    accept="image/*" 
+    capture="environment"
+    id="cameraInput"
+  />
+
+  <br><br>
+
+  <button onclick="upload()">Wyślij zdjęcie</button>
+
+  <p id="result"></p>
+
+<script>
+async function upload() {
+  const fileInput = document.getElementById("cameraInput");
+  const file = fileInput.files[0];
+
+  if (!file) {
+    alert("Zrób zdjęcie!");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("image", file);
+
+  document.getElementById("result").innerText = "⏳ Skanuję...";
+
+  try {
+    const res = await fetch("/ocr", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+
+    document.getElementById("result").innerText =
+      "📧 Email: " + data.email;
+
+  } catch (e) {
+    document.getElementById("result").innerText = "❌ Błąd";
+  }
+}
+</script>
+
+</body>
+</html>

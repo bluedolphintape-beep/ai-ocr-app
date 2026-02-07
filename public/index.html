@@ -1,58 +1,55 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>AI OCR Email Scanner</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skaner Email</title>
 </head>
 
-<body style="font-family: Arial; text-align: center; padding: 40px">
+<body style="font-family: Arial; text-align:center; padding:40px">
 
-  <h1>📸 Skaner Email AI</h1>
+<h2>📸 Skanuj email</h2>
 
-  <input 
-    type="file" 
-    accept="image/*" 
-    capture="environment"
-    id="cameraInput"
-  />
+<input 
+type="file"
+accept="image/*"
+capture="environment"
+id="camera"
+/>
 
-  <br><br>
+<br><br>
 
-  <button onclick="upload()">Wyślij zdjęcie</button>
+<button onclick="upload()">Skanuj</button>
 
-  <p id="result"></p>
+<p id="result"></p>
 
 <script>
+
 async function upload() {
-  const fileInput = document.getElementById("cameraInput");
-  const file = fileInput.files[0];
 
-  if (!file) {
-    alert("Zrób zdjęcie!");
-    return;
-  }
+const file = document.getElementById("camera").files[0];
 
-  const formData = new FormData();
-  formData.append("image", file);
-
-  document.getElementById("result").innerText = "⏳ Skanuję...";
-
-  try {
-    const res = await fetch("/ocr", {
-      method: "POST",
-      body: formData
-    });
-
-    const data = await res.json();
-
-    document.getElementById("result").innerText =
-      "📧 Email: " + data.email;
-
-  } catch (e) {
-    document.getElementById("result").innerText = "❌ Błąd";
-  }
+if(!file){
+alert("Zrób zdjęcie");
+return;
 }
+
+const form = new FormData();
+form.append("image", file);
+
+document.getElementById("result").innerText = "Skanuję...";
+
+const res = await fetch("/ocr", {
+method:"POST",
+body: form
+});
+
+const data = await res.json();
+
+document.getElementById("result").innerText =
+"Email: " + data.email;
+
+}
+
 </script>
 
 </body>

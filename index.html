@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Skaner Email OCR</title>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<style>
+body{
+font-family: Arial;
+background:#0f172a;
+color:white;
+text-align:center;
+padding:30px;
+}
+
+video,canvas,img{
+width:320px;
+border-radius:12px;
+margin-top:15px;
+}
+
+button{
+background:#7c3aed;
+border:none;
+padding:12px 25px;
+border-radius:10px;
+color:white;
+font-size:16px;
+margin:10px;
+cursor:pointer;
+}
+
+button:hover{
+background:#6d28d9;
+}
+
+.box{
+background:#1e293b;
+padding:20px;
+border-radius:15px;
+max-width:500px;
+margin:auto;
+}
+
+.result{
+background:#020617;
+padding:15px;
+border-radius:10px;
+margin-top:15px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>📧 AI OCR Email Scanner</h1>
+
+<div class="box">
+
+<video id="video" autoplay></video>
+<br>
+
+<button onclick="startCamera()">📷 Włącz kamerę</button>
+<button onclick="scan()">🔍 Skanuj tekst</button>
+
+<canvas id="canvas" style="display:none;"></canvas>
+
+<div class="result">
+<h3>Wykryty tekst:</h3>
+<div id="text">---</div>
+</div>
+
+<div class="result">
+<h3>📧 Email:</h3>
+<div id="email">---</div>
+</div>
+
+</div>
+
+<script>
+
+let video = document.getElementById("video");
+let canvas = document.getElementById("canvas");
+let textDiv = document.getElementById("text");
+let emailDiv = document.getElementById("email");
+
+async function startCamera(){
+try{
+let stream = await navigator.mediaDevices.getUserMedia({video:true});
+video.srcObject = stream;
+}catch(e){
+alert("Brak dostępu do kamery");
+}
+}
+
+function extractEmail(text){
+let regex = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/ig;
+let found = text.match(regex);
+return found ? found[0] : "Nie znaleziono emaila";
+}
+
+async function scan(){
+
+textDiv.innerText = "Skanowanie...";
+emailDiv.innerText = "...";
+
+let ctx = canvas.getContext("2d");
+canvas.width = video.videoWidth;
+canvas.height = video.videoHeight;
+ctx.drawImage(video,0,0);
+
+let { data:{ text } } = await Tesseract.recognize(
+canvas,
+'eng',
+{
+logger:m=>console.log(m)
+}
+);
+
+textDiv.innerText = text;
+
+let email = extractEmail(text);
+emailDiv.innerText = email;
+
+}
+
+</script>
+
+</body>
+</html>

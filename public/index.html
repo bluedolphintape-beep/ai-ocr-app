@@ -1,52 +1,97 @@
 <!DOCTYPE html>
-<html>
+<html lang="pl">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Skaner Email</title>
+<title>Live Skaner Email</title>
+
+<style>
+body{
+font-family:Arial;
+background:#111;
+color:white;
+text-align:center;
+padding:20px;
+}
+
+video{
+width:100%;
+max-width:400px;
+border-radius:15px;
+}
+
+button{
+padding:15px 25px;
+font-size:18px;
+background:#00bcd4;
+border:none;
+border-radius:10px;
+color:white;
+margin-top:20px;
+}
+
+canvas{
+display:none;
+}
+</style>
 </head>
 
-<body style="font-family: Arial; text-align:center; padding:40px">
+<body>
 
-<h2>📸 Skanuj email</h2>
+<h2>📸 Live Skaner Email</h2>
 
-<input 
-type="file"
-accept="image/*"
-capture="environment"
-id="camera"
-/>
-
-<br><br>
-
-<button onclick="upload()">Skanuj</button>
+<video id="video" autoplay playsinline></video>
+<br>
+<button onclick="scan()">Skanuj</button>
 
 <p id="result"></p>
 
+<canvas id="canvas"></canvas>
+
 <script>
 
-async function upload() {
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
 
-const file = document.getElementById("camera").files[0];
+async function startCamera(){
 
-if(!file){
-alert("Zrób zdjęcie");
-return;
+const stream = await navigator.mediaDevices.getUserMedia({
+video:{
+facingMode:"environment"
+}
+});
+
+video.srcObject = stream;
+
 }
 
+startCamera();
+
+async function scan(){
+
+document.getElementById("result").innerText="Skanuję...";
+
+const ctx = canvas.getContext("2d");
+
+canvas.width = video.videoWidth;
+canvas.height = video.videoHeight;
+
+ctx.drawImage(video,0,0);
+
+const blob = await new Promise(r => canvas.toBlob(r,"image/jpeg"));
+
 const form = new FormData();
-form.append("image", file);
+form.append("image", blob, "scan.jpg");
 
-document.getElementById("result").innerText = "Skanuję...";
-
-const res = await fetch("/ocr", {
+const res = await fetch("/ocr",{
 method:"POST",
 body: form
 });
 
 const data = await res.json();
 
-document.getElementById("result").innerText =
-"Email: " + data.email;
+document.getElementById("result").innerText=
+"📧 Email: "+data.email;
 
 }
 

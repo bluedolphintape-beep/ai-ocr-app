@@ -2,96 +2,115 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Live Skaner Email</title>
+<title>Skaner Email – LIVE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{
-font-family:Arial;
-background:#111;
-color:white;
-text-align:center;
-padding:20px;
+body {
+font-family: Arial, sans-serif;
+text-align: center;
+background: #003869;
+padding: 20px;
+color: #fff;
 }
 
-video{
-width:100%;
-max-width:400px;
-border-radius:15px;
+video {
+width: 100%;
+max-width: 400px;
+border-radius: 12px;
+margin: auto;
 }
 
-button{
-padding:15px 25px;
-font-size:18px;
-background:#00bcd4;
-border:none;
-border-radius:10px;
-color:white;
-margin-top:20px;
+button {
+padding: 1em 2em;
+font-size: 1.1em;
+background-color: #007bff;
+color: #fff;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+margin-top: 20px;
 }
 
-canvas{
-display:none;
+button:hover {
+background: #0056b3;
+}
+
+#info {
+margin-top: 20px;
+font-weight: bold;
 }
 </style>
 </head>
 
 <body>
 
-<h2>📸 Live Skaner Email</h2>
+<h2>📷 Zeskanuj Email z obrazu</h2>
 
 <video id="video" autoplay playsinline></video>
 <br>
-<button onclick="scan()">Skanuj</button>
+<button onclick="scan()">📸 Skanuj</button>
 
-<p id="result"></p>
+<p id="info"></p>
 
-<canvas id="canvas"></canvas>
+<canvas id="canvas" style="display:none"></canvas>
 
 <script>
 
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
+const info = document.getElementById("info");
 
-async function startCamera(){
+async function startCamera() {
+
+try {
 
 const stream = await navigator.mediaDevices.getUserMedia({
-video:{
-facingMode:"environment"
-}
+video: { facingMode: "environment" }
 });
 
 video.srcObject = stream;
+
+} catch (e) {
+info.innerText = "❌ Brak dostępu do kamery";
+}
 
 }
 
 startCamera();
 
-async function scan(){
+async function scan() {
 
-document.getElementById("result").innerText="Skanuję...";
+info.innerText = "⏳ Skanuję obraz...";
 
 const ctx = canvas.getContext("2d");
 
 canvas.width = video.videoWidth;
 canvas.height = video.videoHeight;
 
-ctx.drawImage(video,0,0);
+ctx.drawImage(video, 0, 0);
 
-const blob = await new Promise(r => canvas.toBlob(r,"image/jpeg"));
+const blob = await new Promise(r => canvas.toBlob(r, "image/jpeg"));
 
 const form = new FormData();
 form.append("image", blob, "scan.jpg");
 
-const res = await fetch("/ocr",{
-method:"POST",
+try {
+
+const res = await fetch("/ocr", {
+method: "POST",
 body: form
 });
 
 const data = await res.json();
 
-document.getElementById("result").innerText=
-"📧 Email: "+data.email;
+info.innerText = "📧 Email: " + data.email;
+
+} catch (e) {
+
+info.innerText = "❌ Błąd OCR";
+
+}
 
 }
 

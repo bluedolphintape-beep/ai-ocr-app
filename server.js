@@ -1,5 +1,6 @@
 import express from "express";
 import multer from "multer";
+import cors from "cors";
 import Tesseract from "tesseract.js";
 import OpenAI from "openai";
 import fs from "fs";
@@ -7,14 +8,13 @@ import fs from "fs";
 const app = express();
 const upload = multer({ dest: "uploads/" });
 
+app.use(cors());
 app.use(express.static("public"));
 
-/* OPENAI (fallback OCR) */
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-/* EMAIL REGEX */
 function extractEmail(text) {
   const emailRegex =
     /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
@@ -23,20 +23,17 @@ function extractEmail(text) {
   return match ? match[0] : null;
 }
 
-/* OCR ENDPOINT HYBRID */
 app.post("/ocr", upload.single("image"), async (req, res) => {
 
   try {
 
-    /* ===== STEP 1 — TESSERACT ===== */
-
+    /* ===== TESSERACT ===== */
     const tess = await Tesseract.recognize(
       req.file.path,
       "eng"
     );
 
     const tessText = tess.data.text;
-
     const tessEmail = extractEmail(tessText);
 
     if (tessEmail) {
@@ -46,7 +43,7 @@ app.post("/ocr", upload.single("image"), async (req, res) => {
       });
     }
 
-    /* ===== STEP 2 — OPENAI FALLBACK ===== */
+    /* ===== OPENAI FALLBACK ===== */
 
     try {
 
@@ -84,7 +81,7 @@ app.post("/ocr", upload.single("image"), async (req, res) => {
       console.log("OpenAI fallback error:", aiErr);
 
       return res.json({
-        email: "Nie znaleziono (Tesseract + AI fail)",
+        email: "Nie znaleziono",
         source: "none"
       });
 

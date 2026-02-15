@@ -1,7 +1,7 @@
 {
   "name": "ai-ocr-app",
   "version": "1.0.0",
-  "description": "AI OCR Hybrid Scanner - Tesseract + OpenAI",
+  "description": "AI OCR Hybrid Scanner",
   "type": "module",
   "main": "server.js",
   "scripts": {

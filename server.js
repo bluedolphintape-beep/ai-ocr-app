@@ -18,7 +18,6 @@ const openai = new OpenAI({
 function extractEmail(text) {
   const emailRegex =
     /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
-
   const match = text.match(emailRegex);
   return match ? match[0] : null;
 }
@@ -27,7 +26,6 @@ app.post("/ocr", upload.single("image"), async (req, res) => {
 
   try {
 
-    /* ===== TESSERACT ===== */
     const tess = await Tesseract.recognize(
       req.file.path,
       "eng"
@@ -42,8 +40,6 @@ app.post("/ocr", upload.single("image"), async (req, res) => {
         source: "tesseract"
       });
     }
-
-    /* ===== OPENAI FALLBACK ===== */
 
     try {
 
@@ -76,20 +72,14 @@ app.post("/ocr", upload.single("image"), async (req, res) => {
         source: "openai"
       });
 
-    } catch (aiErr) {
-
-      console.log("OpenAI fallback error:", aiErr);
-
+    } catch {
       return res.json({
         email: "Nie znaleziono",
         source: "none"
       });
-
     }
 
   } catch (e) {
-
-    console.log("OCR error:", e);
 
     res.json({
       email: "Błąd OCR"
